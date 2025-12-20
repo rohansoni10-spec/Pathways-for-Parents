@@ -9,11 +9,20 @@ import { User, LogOut, Trash2, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
-  const { user, logout, updateUser } = useAuth();
+  const { user, logout, updateUser, isLoading } = useAuth();
   const router = useRouter();
 
+  React.useEffect(() => {
+    if (!user && !isLoading) {
+      router.push('/login');
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
   if (!user) {
-    router.push('/login');
     return null;
   }
 
@@ -95,3 +104,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+
