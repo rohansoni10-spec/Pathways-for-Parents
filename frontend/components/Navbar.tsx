@@ -27,7 +27,7 @@ export default function Navbar() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-emerald-400 flex items-center justify-center mr-2">
                 <span className="text-white font-bold text-lg">P</span>
               </div>
-              <span className="font-bold text-xl text-slate-800 hidden sm:block">Pathways</span>
+              <span className="font-bold text-xl text-slate-800 hidden sm:block">Pathways for Parents</span>
             </Link>
           </div>
 
@@ -134,3 +134,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

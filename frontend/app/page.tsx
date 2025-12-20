@@ -46,7 +46,7 @@ export default function LandingPage() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Why parents trust Pathways</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Why parents trust Pathways for Parents</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               We turn a complex, overwhelming process into manageable steps.
             </p>
@@ -173,7 +173,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <span className="text-white font-bold text-xl block mb-4">Pathways</span>
+              <span className="text-white font-bold text-xl block mb-4">Pathways for Parents</span>
               <p className="max-w-xs">
                 Empowering parents of young children navigating autism with clear, actionable guidance.
               </p>
@@ -203,3 +203,4 @@ export default function LandingPage() {
     </div>
   );
 }
+

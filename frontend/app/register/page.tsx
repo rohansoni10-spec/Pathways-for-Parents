@@ -25,7 +25,7 @@ export default function RegisterPage() {
     // Simulate network delay
     setTimeout(() => {
       register(email, name);
-      toast.success('Account created! Welcome to Pathways.');
+      toast.success('Account created! Welcome to Pathways for Parents.');
       router.push('/onboarding'); // Redirect to onboarding after signup
       setIsLoading(false);
     }, 1000);
@@ -89,3 +89,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+
