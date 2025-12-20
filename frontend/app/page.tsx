@@ -189,9 +189,9 @@ export default function LandingPage() {
             <div>
               <h4 className="text-background font-bold mb-4">Support</h4>
               <ul className="space-y-2">
-                <li><Link href="#" className="hover:text-background">About Us</Link></li>
-                <li><Link href="#" className="hover:text-background">Contact</Link></li>
-                <li><Link href="#" className="hover:text-background">Privacy Policy</Link></li>
+                <li><Link href="/about" className="hover:text-background">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-background">Contact</Link></li>
+                <li><Link href="/privacy" className="hover:text-background">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
@@ -203,3 +203,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
