@@ -2,10 +2,19 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle2, ShieldCheck, Heart, Users } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function LandingPage() {
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -183,7 +192,15 @@ export default function LandingPage() {
               <ul className="space-y-2">
                 <li><Link href="/journey" className="hover:text-background">Journey</Link></li>
                 <li><Link href="/resources" className="hover:text-background">Resources</Link></li>
-                <li><Link href="/login" className="hover:text-background">Login</Link></li>
+                {user ? (
+                  <li>
+                    <button onClick={handleLogout} className="hover:text-background text-left">
+                      Log Out
+                    </button>
+                  </li>
+                ) : (
+                  <li><Link href="/login" className="hover:text-background">Login</Link></li>
+                )}
               </ul>
             </div>
             <div>
@@ -203,4 +220,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
 
