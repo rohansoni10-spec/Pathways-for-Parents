@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Map, BookOpen, User, LogOut, Menu, X } from 'lucide-react';
 import { ThemeSwitcher } from './ThemeSwitcher';
 
@@ -137,6 +139,7 @@ export default function Navbar() {
     </nav>
   );
 }
+
 
 
 
