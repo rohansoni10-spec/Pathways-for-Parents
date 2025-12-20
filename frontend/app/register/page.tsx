@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
@@ -42,7 +43,7 @@ export default function RegisterPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium leading-none">Name</label>
+              <Label htmlFor="name">Name</Label>
               <Input 
                 id="name" 
                 placeholder="Jane Doe" 
@@ -51,7 +52,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium leading-none">Email</label>
+              <Label htmlFor="email">Email</Label>
               <Input 
                 id="email" 
                 type="email" 
@@ -62,7 +63,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium leading-none">Password</label>
+              <Label htmlFor="password">Password</Label>
               <Input 
                 id="password" 
                 type="password" 
@@ -78,7 +79,7 @@ export default function RegisterPage() {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-slate-500">
-            Already have an account?{' '}
+            Don't have an account?{' '}
             <Link href="/login" className="text-sky-600 hover:underline font-medium">
               Sign in
             </Link>
