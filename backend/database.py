@@ -15,6 +15,16 @@ async def connect_to_mongodb() -> None:
     global mongodb_client
     
     try:
+        # Debug: Print URI format (without exposing credentials)
+        uri = settings.mongodb_uri
+        if uri:
+            uri_prefix = uri.split('://')[0] if '://' in uri else 'NO_SCHEME'
+            print(f"DEBUG: MongoDB URI scheme: {uri_prefix}")
+            print(f"DEBUG: URI length: {len(uri)}")
+        else:
+            print("ERROR: MONGODB_URI is empty or None")
+            raise ValueError("MONGODB_URI environment variable is not set")
+        
         mongodb_client = AsyncIOMotorClient(
             settings.mongodb_uri,
             serverSelectionTimeoutMS=5000,
@@ -25,6 +35,9 @@ async def connect_to_mongodb() -> None:
         print("✓ Successfully connected to MongoDB Atlas")
     except ConnectionFailure as e:
         print(f"✗ Failed to connect to MongoDB: {e}")
+        raise
+    except Exception as e:
+        print(f"✗ Unexpected error connecting to MongoDB: {e}")
         raise
 
 
