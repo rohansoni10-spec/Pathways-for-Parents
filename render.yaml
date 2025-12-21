@@ -7,18 +7,18 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: DATABASE_URL
+      - key: MONGODB_URI
         fromDatabase:
           name: pathways-db
           property: connectionString
-      - key: SECRET_KEY
+      - key: JWT_SECRET
         generateValue: true
-      - key: ALGORITHM
-        value: HS256
-      - key: ACCESS_TOKEN_EXPIRE_MINUTES
-        value: 30
-      - key: ENVIRONMENT
+      - key: JWT_EXPIRES_IN
+        value: 86400
+      - key: APP_ENV
         value: production
+      - key: CORS_ORIGINS
+        value: https://your-frontend-domain.netlify.app,https://your-frontend-domain.com
 
 databases:
   - name: pathways-db
