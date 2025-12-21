@@ -29,11 +29,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS middleware
+# Configure CORS middleware - Allow all origins for now
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
+    allow_origins=["*"],  # Allow all origins temporarily
+    allow_credentials=False,  # Must be False when allow_origins is ["*"]
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
     expose_headers=["*"],
