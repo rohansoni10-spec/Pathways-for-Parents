@@ -68,7 +68,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-500">Milestones Completed</label>
-                <p className="text-lg font-medium text-slate-900">{user.completedMilestones.length}</p>
+                <p className="text-lg font-medium text-slate-900">{user.completedMilestones?.length || 0}</p>
               </div>
             </CardContent>
           </Card>

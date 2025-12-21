@@ -22,13 +22,15 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate network delay
-    setTimeout(() => {
-      register(email, name);
+    try {
+      await register(email, password, name);
       toast.success('Account created! Welcome to Pathways for Parents.');
       router.push('/onboarding'); // Redirect to onboarding after signup
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Registration failed');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

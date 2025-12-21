@@ -21,13 +21,15 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate network delay
-    setTimeout(() => {
-      login(email);
+    try {
+      await login(email, password);
       toast.success('Welcome back!');
       router.push('/journey');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Login failed');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

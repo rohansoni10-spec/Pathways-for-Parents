@@ -1,18 +1,148 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { MILESTONES } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle2, ShieldCheck, Heart, Users } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight, CheckCircle2, ShieldCheck, Heart, Users, Loader2, Circle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+
+interface Stage {
+  id: string;
+  title: string;
+  description: string;
+  ageRange: string;
+  color: string;
+  icon: string;
+  order: number;
+  nextStepPrompt?: string;
+}
+
+interface Progress {
+  completed_milestone_ids: string[];
+  stage_progress: Record<string, {
+    total_milestones: number;
+    completed_milestones: number;
+    percentage: number;
+  }>;
+  total_completed: number;
+  total_milestones: number;
+  // Legacy fields for backward compatibility
+  completedMilestones?: string[];
+  progressByStage?: Record<string, number>;
+}
 
 export default function LandingPage() {
   const { user, logout } = useAuth();
+  const router = useRouter();
+  const [stages, setStages] = useState<Stage[]>([]);
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [recommendedStage, setRecommendedStage] = useState<Stage | null>(null);
+
+  useEffect(() => {
+    fetchRoadmapData();
+  }, [user]);
+
+  const fetchRoadmapData = async () => {
+    setLoading(true);
+    try {
+      // Fetch stages
+      const stagesRes = await fetch('http://localhost:8000/api/v1/stages');
+      if (stagesRes.ok) {
+        const stagesData = await stagesRes.json();
+        setStages(stagesData);
+        console.log('Stages fetched:', stagesData);
+        
+        // Find recommended stage - check both user object and stages data
+        if (user?.recommendedStageId) {
+          const recommended = stagesData.find((s: Stage) => s.id === user.recommendedStageId);
+          console.log('User recommendedStageId:', user.recommendedStageId);
+          console.log('Recommended stage found:', recommended);
+          setRecommendedStage(recommended || null);
+        } else {
+          console.log('No user or no recommendedStageId');
+          setRecommendedStage(null);
+        }
+      }
+
+      // Fetch progress if user is authenticated
+      if (user) {
+        const token = localStorage.getItem('pathways_token');
+        if (token) {
+          const progressRes = await fetch('http://localhost:8000/api/v1/progress', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (progressRes.ok) {
+            const progressData = await progressRes.json();
+            console.log('Progress data fetched:', progressData);
+            // Transform backend response to match our interface
+            const transformedProgress: Progress = {
+              completed_milestone_ids: progressData.completed_milestone_ids || [],
+              stage_progress: progressData.stage_progress || {},
+              total_completed: progressData.total_completed || 0,
+              total_milestones: progressData.total_milestones || 0,
+              // Legacy format for backward compatibility
+              completedMilestones: progressData.completed_milestone_ids || [],
+              progressByStage: Object.entries(progressData.stage_progress || {}).reduce((acc, [key, value]: [string, any]) => {
+                acc[key] = value.percentage || 0;
+                return acc;
+              }, {} as Record<string, number>)
+            };
+            console.log('Transformed progress:', transformedProgress);
+            setProgress(transformedProgress);
+          }
+        }
+      } else {
+        setProgress(null);
+      }
+    } catch (error) {
+      console.error('Error fetching roadmap data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
     toast.success('Logged out successfully');
+  };
+
+  const handleStartJourney = () => {
+    // Check if user is authenticated
+    if (user) {
+      // Check if user has an existing journey started
+      // A journey is considered "started" if they have completed onboarding (has recommendedStageId)
+      const hasStartedJourney = user.recommendedStageId !== undefined && user.recommendedStageId !== null;
+      
+      if (hasStartedJourney) {
+        // User has an existing journey (completed onboarding) - take them to journey page
+        router.push('/journey');
+      } else {
+        // User hasn't completed onboarding yet - take them to onboarding flow
+        router.push('/onboarding');
+      }
+    } else {
+      // New user - take them to registration
+      router.push('/register');
+    }
+  };
+
+  const getStageColorClasses = (color: string) => {
+    const colorMap: Record<string, string> = {
+      'bg-amber-100 text-amber-800': 'bg-amber-50 border-amber-200 hover:bg-amber-100',
+      'bg-purple-100 text-purple-800': 'bg-purple-50 border-purple-200 hover:bg-purple-100',
+      'bg-emerald-100 text-emerald-800': 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100',
+      'bg-blue-100 text-blue-800': 'bg-blue-50 border-blue-200 hover:bg-blue-100',
+      'bg-rose-100 text-rose-800': 'bg-rose-50 border-rose-200 hover:bg-rose-100',
+    };
+    return colorMap[color] || 'bg-accent/50 border-border hover:bg-accent';
   };
 
   return (
@@ -35,12 +165,14 @@ export default function LandingPage() {
               Stop drowning in information. Get a personalized, step-by-step roadmap that shows you exactly what matters right now for your child.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/onboarding">
-                <Button size="lg" className="w-full sm:w-auto text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
-                  Start My Journey
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                className="w-full sm:w-auto text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
+                onClick={handleStartJourney}
+              >
+                {user ? (user.recommendedStageId ? 'View My Journey' : 'Complete Setup') : 'Start My Journey'}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
               <Link href="/resources">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg px-8 py-6 bg-card/80 backdrop-blur-sm">
                   Browse Resources
@@ -123,39 +255,111 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="mt-10">
-                <Link href="/onboarding">
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Get Started Now</Button>
-                </Link>
+                <Button
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={handleStartJourney}
+                >
+                  Get Started Now
+                </Button>
               </div>
             </div>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl transform rotate-3 opacity-50"></div>
               <div className="relative bg-card rounded-2xl shadow-xl p-8 border border-border">
-                <div className="space-y-4">
-                  <div className="h-4 bg-accent rounded w-3/4"></div>
-                  <div className="h-4 bg-accent rounded w-1/2"></div>
-                  <div className="h-32 bg-accent/50 rounded-xl border border-border p-4 flex items-center justify-center">
-                    <span className="text-primary font-medium">Your Personalized Roadmap</span>
+                {loading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full bg-secondary/20 text-secondary flex items-center justify-center">
-                        <CheckCircle2 size={12} />
+                ) : user && recommendedStage ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <CheckCircle2 className="text-primary h-5 w-5" />
                       </div>
-                      <div className="h-3 bg-accent rounded w-full"></div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full bg-secondary/20 text-secondary flex items-center justify-center">
-                        <CheckCircle2 size={12} />
+                      <div>
+                        <h3 className="font-bold text-foreground">Your Journey</h3>
+                        <p className="text-sm text-muted-foreground">{recommendedStage.title}</p>
                       </div>
-                      <div className="h-3 bg-accent rounded w-5/6"></div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full border border-border"></div>
-                      <div className="h-3 bg-accent rounded w-4/5"></div>
+                    
+                    <div className="bg-accent/30 rounded-lg p-4 border border-border">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-foreground">Progress</span>
+                        <span className="text-sm font-medium text-primary">
+                          {progress ? `${progress.total_completed}/${progress.total_milestones}` : '0/0'}
+                        </span>
+                      </div>
+                      <div className="w-full bg-accent rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: progress && progress.total_milestones > 0
+                              ? `${(progress.total_completed / progress.total_milestones) * 100}%`
+                              : '0%'
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 mt-4">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                        Current Milestones
+                      </p>
+                      {MILESTONES
+                        .filter(m => m.stageId === recommendedStage.id)
+                        .slice(0, 3)
+                        .map((milestone) => {
+                          const isCompleted = progress?.completed_milestone_ids?.includes(milestone.id);
+                          return (
+                            <div key={milestone.id} className="flex items-center gap-3 group">
+                              <div className={cn(
+                                "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
+                                isCompleted
+                                  ? "bg-primary text-primary-foreground"
+                                  : "border-2 border-border bg-background"
+                              )}>
+                                {isCompleted && <CheckCircle2 size={14} />}
+                              </div>
+                              <div className={cn(
+                                "text-sm transition-colors",
+                                isCompleted
+                                  ? "text-muted-foreground line-through"
+                                  : "text-foreground group-hover:text-primary"
+                              )}>
+                                {milestone.title}
+                              </div>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="h-4 bg-accent rounded w-3/4"></div>
+                    <div className="h-4 bg-accent rounded w-1/2"></div>
+                    <div className="h-32 bg-accent/50 rounded-xl border border-border p-4 flex items-center justify-center">
+                      <span className="text-primary font-medium">Journey Preview</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 rounded-full bg-secondary/20 text-secondary flex items-center justify-center">
+                          <CheckCircle2 size={12} />
+                        </div>
+                        <div className="h-3 bg-accent rounded w-full"></div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 rounded-full bg-secondary/20 text-secondary flex items-center justify-center">
+                          <CheckCircle2 size={12} />
+                        </div>
+                        <div className="h-3 bg-accent rounded w-5/6"></div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 rounded-full border border-border"></div>
+                        <div className="h-3 bg-accent rounded w-4/5"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -169,11 +373,13 @@ export default function LandingPage() {
           <p className="text-xl text-primary-foreground/90 mb-10">
             Join thousands of parents finding their way forward, one step at a time.
           </p>
-          <Link href="/register">
-            <Button size="lg" className="bg-card text-primary hover:bg-accent text-lg px-8 py-6 shadow-xl">
-              Create Free Account
-            </Button>
-          </Link>
+          {!user && (
+            <Link href="/register">
+              <Button size="lg" className="bg-card text-primary hover:bg-accent text-lg px-8 py-6 shadow-xl">
+                Create Free Account
+              </Button>
+            </Link>
+          )}
         </div>
       </section>
 
@@ -220,5 +426,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-

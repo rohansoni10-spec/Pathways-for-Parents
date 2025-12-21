@@ -29,7 +29,7 @@ export default function JourneyPage() {
     const stageMilestones = MILESTONES.filter(m => m.stageId === stageId);
     if (stageMilestones.length === 0) return 0;
     
-    const completedCount = stageMilestones.filter(m => user?.completedMilestones.includes(m.id)).length;
+    const completedCount = stageMilestones.filter(m => user?.completedMilestones?.includes(m.id)).length;
     return Math.round((completedCount / stageMilestones.length) * 100);
   };
 

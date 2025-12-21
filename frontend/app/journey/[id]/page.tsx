@@ -37,7 +37,7 @@ export default function StageDetailPage() {
 
   const handleToggle = (id: string) => {
     toggleMilestone(id);
-    const isNowComplete = !user?.completedMilestones.includes(id);
+    const isNowComplete = !user?.completedMilestones?.includes(id);
     if (isNowComplete) {
       toast.success("Milestone completed! Great job.", {
         icon: '👏',
@@ -58,7 +58,7 @@ export default function StageDetailPage() {
     }
   };
 
-  const completedCount = milestones.filter(m => user?.completedMilestones.includes(m.id)).length;
+  const completedCount = milestones.filter(m => user?.completedMilestones?.includes(m.id)).length;
   const progress = Math.round((completedCount / milestones.length) * 100);
 
   return (
@@ -103,7 +103,7 @@ export default function StageDetailPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="space-y-6">
           {milestones.map((milestone) => {
-            const isCompleted = user?.completedMilestones.includes(milestone.id);
+            const isCompleted = user?.completedMilestones?.includes(milestone.id);
             const isExpanded = expandedMilestone === milestone.id;
 
             return (
