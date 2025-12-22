@@ -11,6 +11,8 @@ import { ArrowRight, CheckCircle2, ShieldCheck, Heart, Users, Loader2, Circle } 
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pathways-backend-9lei.onrender.com/api/v1';
+
 interface Stage {
   id: string;
   title: string;
@@ -52,7 +54,7 @@ export default function LandingPage() {
     setLoading(true);
     try {
       // Fetch stages
-      const stagesRes = await fetch('http://localhost:8000/api/v1/stages');
+      const stagesRes = await fetch(`${API_BASE_URL}/stages`);
       if (stagesRes.ok) {
         const stagesData = await stagesRes.json();
         setStages(stagesData);
@@ -74,7 +76,7 @@ export default function LandingPage() {
       if (user) {
         const token = localStorage.getItem('pathways_token');
         if (token) {
-          const progressRes = await fetch('http://localhost:8000/api/v1/progress', {
+          const progressRes = await fetch(`${API_BASE_URL}/progress`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
